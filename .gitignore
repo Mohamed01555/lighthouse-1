@@ -1,0 +1,4 @@
+/.idea/
+/.vscode/
+/src/api/migrations/
+/src/db.sqlite3
