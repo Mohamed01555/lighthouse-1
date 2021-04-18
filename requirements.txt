@@ -1,2 +1,7 @@
 Django
 djangorestframework
+insightface
+mxnet
+PIL
+numpy
+cv2
