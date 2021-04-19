@@ -20,7 +20,7 @@ class KnownMissingPersonImages(models.Model):
     imgEmbedding = models.JSONField()
 
     def __str__(self):
-        return f"image for {self.missingPerson} taken by {self.takenBy}"
+        return f"image for {self.missingPerson}"
 
 
 class UserSeeknownMissingPerson(models.Model):
