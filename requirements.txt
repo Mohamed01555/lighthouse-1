@@ -2,7 +2,6 @@ Django
 djangorestframework
 insightface
 mxnet
-PIL
+Pillow
 numpy
-cv2
 pillow
