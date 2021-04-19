@@ -5,3 +5,4 @@ mxnet
 PIL
 numpy
 cv2
+pillow
