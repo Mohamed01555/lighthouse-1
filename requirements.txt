@@ -4,4 +4,3 @@ insightface
 mxnet
 Pillow
 numpy
-pillow

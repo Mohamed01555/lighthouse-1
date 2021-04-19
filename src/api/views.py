@@ -1,5 +1,4 @@
 from .models import KnownMissingPerson, KnownMissingPersonImages
-from .classifier.classifier import ImageClassifier
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
