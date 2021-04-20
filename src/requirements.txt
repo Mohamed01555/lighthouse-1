@@ -6,3 +6,4 @@ Pillow
 #numpy
 django_heroku
 gunicorn
+django-storages[dropbox]
