@@ -1,1 +1,1 @@
-web: gunicorn lighthouse.wsgi
+web: gunicorn src/lighthouse.wsgi
