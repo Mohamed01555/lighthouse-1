@@ -5,3 +5,4 @@ djangorestframework
 Pillow
 #numpy
 django_heroku
+gunicorn
