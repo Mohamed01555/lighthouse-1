@@ -1,0 +1,8 @@
+Django
+djangorestframework
+#insightface
+#mxnet
+Pillow
+#numpy
+django_heroku
+gunicorn
