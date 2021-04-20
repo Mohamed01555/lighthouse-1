@@ -1,6 +1,7 @@
 Django
 djangorestframework
-insightface
-mxnet
+#insightface
+#mxnet
 Pillow
-numpy
+#numpy
+django_heroku
