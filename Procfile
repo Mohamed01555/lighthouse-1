@@ -1,1 +1,0 @@
-web: sh -c 'cd ./src/ && gunicorn lighthouse.wsgi && python3 manage.py migrate && python3 manage.py makemigrations && python3 manage.py migrate'
