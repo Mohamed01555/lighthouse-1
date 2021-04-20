@@ -1,1 +1,1 @@
-web: gunicorn src/lighthouse:app
+web: sh -c 'cd ./src/ && gunicorn lighthouse:app'
