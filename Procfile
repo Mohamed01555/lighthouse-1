@@ -1,1 +1,1 @@
-web: gunicorn lighthouse:app
+web: gunicorn src/lighthouse:app
