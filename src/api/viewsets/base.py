@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from django.http import JsonResponse
+from abc import ABC
 
 
 class BaseViewSet(ABC):

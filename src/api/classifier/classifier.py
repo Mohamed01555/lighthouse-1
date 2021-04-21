@@ -45,4 +45,17 @@ class ImageClassifier:
 
     # TODO: make imagesEmbeds dynamic
     def find(self, image, image_list):
-        pass
+        most_similar = {"pk": -1, "value": -1}
+        for pk, source_image in image_list.items():
+            similarity = self.get_similarity(source_image, image)
+            if similarity > most_similar["value"]:
+                most_similar["index"] = pk
+                most_similar["value"] = similarity
+        return most_similar
+
+
+class ImageClassifierSimulator:
+    @staticmethod
+    def find(image, image_list):
+        most_similar = {"pk": -1, "value": -1}
+        return most_similar

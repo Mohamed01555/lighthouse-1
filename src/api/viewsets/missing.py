@@ -20,7 +20,7 @@ class MissingViewSet(BaseViewSet):
             person.save()
             image = models.KnownMissingPersonImages(missingPerson=person, imgPath=image)
             image.save()
-            return JsonResponse({"message": "posted"}, status=201)
+            return JsonResponse(person.serialize(), status=201)
         except IntegrityError:
             return JsonResponse({"message": "Database integrity error"}, status=500)
 
