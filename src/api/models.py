@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 class KnownMissingPerson(models.Model):
     name = models.CharField(max_length=50)
+    image = models.ImageField(upload_to="knownMissingPersonsImages")
     contactPerson = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -16,9 +17,11 @@ class KnownMissingPerson(models.Model):
         return self.name
 
     def serialize(self):
-        images = self.knownMissingPersonsImages.all()
-        images = [image.imgPath.url for image in images]
-        return {"id": self.id, "name": self.name, "images": images}
+        return {
+            "id": self.id,
+            "name": self.name,
+            "image": self.image.url,
+        }
 
 
 class KnownMissingPersonImages(models.Model):
@@ -32,8 +35,8 @@ class KnownMissingPersonImages(models.Model):
     def __str__(self):
         return f"image for {self.missingPerson}"
 
-    def __unicode__(self):
-        return str(self.imgPath)
+    def serialize(self):
+        return {"id": self.id, "url": self.imgPath.url}
 
 
 class UserSeeKnownMissingPerson(models.Model):

@@ -2,7 +2,6 @@ from .. import models
 from django.http import JsonResponse
 from django.db import IntegrityError
 from .base import BaseViewSet
-import json
 
 
 class MissingViewSet(BaseViewSet):
@@ -16,10 +15,8 @@ class MissingViewSet(BaseViewSet):
         name = data["name"]
         image = files["image"]
         try:
-            person = models.KnownMissingPerson(name=name)
+            person = models.KnownMissingPerson(name=name, image=image)
             person.save()
-            image = models.KnownMissingPersonImages(missingPerson=person, imgPath=image)
-            image.save()
             return JsonResponse(person.serialize(), status=201)
         except IntegrityError:
             return JsonResponse({"message": "Database integrity error"}, status=500)
@@ -35,7 +32,7 @@ class MissingIdViewSet(BaseViewSet):
     def __init__(self, request, pk):
         super().__init__(request)
         self.pk = pk
-        self.verbs = {"GET": self.get, "DELETE": self.delete, "PUT": self.put}
+        self.verbs = {"GET": self.get, "DELETE": self.delete, "PATCH": self.patch}
 
     def get(self):
         try:
@@ -50,10 +47,15 @@ class MissingIdViewSet(BaseViewSet):
         person.delete()
         return JsonResponse({"message": "deleted"}, status=204)
 
-    def put(self):
+    def patch(self):
         person = models.KnownMissingPerson.objects.get(id=self.pk)
-        data = json.loads(self.request.body)
+        data = dict(self.request.PATCH)
+        image = self.request.FILES["image"]
+        data["image"] = image
+        print(data)
         for attribute, value in data.items():
+            if isinstance(value, list):
+                value = value[0]
             setattr(person, attribute, value)
         person.save()
-        return JsonResponse({"message": "edited"}, status=202)
+        return JsonResponse(person.serialize(), status=202)
