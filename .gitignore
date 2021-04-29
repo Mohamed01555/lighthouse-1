@@ -3,3 +3,4 @@
 /src/api/migrations/
 /src/db.sqlite3
 __pycache__/
+/src/api/migrations/
