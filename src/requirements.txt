@@ -7,3 +7,4 @@ Pillow
 django_heroku
 gunicorn
 django-storages[dropbox]
+psycopg2
