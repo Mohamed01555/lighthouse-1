@@ -50,9 +50,7 @@ class MissingIdViewSet(BaseViewSet):
     def patch(self):
         person = models.KnownMissingPerson.objects.get(id=self.pk)
         data = dict(self.request.PATCH)
-        image = self.request.FILES["image"]
-        data["image"] = image
-        print(data)
+        data = {**data, **self.request.FILES}
         for attribute, value in data.items():
             if isinstance(value, list):
                 value = value[0]

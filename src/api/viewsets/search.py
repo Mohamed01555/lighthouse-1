@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 
 from .base import BaseViewSet
-from ..classifier.classifier import ImageClassifierSimulator
+from ..classifier.sim_classifier import ImageClassifierSimulator
 from ..models import KnownMissingPersonImages
 
 
