@@ -1,54 +1,65 @@
-"""
-Original file is located at
-    https://colab.research.google.com/drive/1EltssuA0Fa_uX_ZRBbf51EtxqPmTt6XT
-"""
+from elasticsearch import Elasticsearch, RequestError
+from deepface.basemodels import Facenet
+from deepface.commons import functions
 
-import insightface
-from PIL import Image
-from numpy import asarray, dot
-
-
-class ImageClassifier:
+class Search:
     def __init__(self):
-        self.model = insightface.app.FaceAnalysis(
-            det_name="retinaface_mnet025_v2", rec_name="arcface_r100_v1", ga_name=None
-        )
-        self.model.prepare(ctx_id=-1, nms=0.4)
-        # ctx_id = -1 to use CPU
+        
+        self.es = Elasticsearch([{'host':'localhost', 'port':'9200'}])
 
-    @staticmethod
-    def prepare_image(filename):
-        image = Image.open(filename).convert("RGB")
-        pixels = asarray(image)
-        return pixels
+        mapping = {"mappings": {"properties": {"title_vector":
+                  {"type": "dense_vector","dims": 128},"title_name": {"type": "keyword"}}}}
+        
+        try:
+            self.es.indices.create(index="final_face_recognition", body=mapping)
+            
+        except RequestError:
+            print('Index already exists!!')
+        
+    def add_emb_to_idx(self, emb, index, image_name=None):
+        doc = {"title_vector": emb, "title_name": image_name}
+        self.es.create("final_face_recognition", id=index, body=doc)
+        
+    def delete_emb_from_index(self, index):
+        self.es.delete(index="final_face_recognition",id=index)
+        
+    def search(self, emb, size):
+        '''
+        size : # nearest neighbours
+        '''
+        query = {
+                "size": size,  #foe ex 5 nearest neighbours
+                "query": {
+                "script_score": {
+                    "query": {
+                        "match_all": {}
+                    },
+                    "script": {
+                        "source": "cosineSimilarity(params.queryVector, 'title_vector')+1",
+                        #"source": "1 / (1 + l2norm(params.queryVector, 'title_vector'))", #euclidean distance
+                        "params": {
+                            "queryVector": list(emb)
+                        }
+                    }
+                }
+                }}
+        
+        res = self.es.search(index="final_face_recognition", body=query)
+        return res
+        
+class Model:
+    global model
+    model = Facenet.loadModel()
+    def __init__(self):
+        self.target_size = (160, 160)
+        self.embedding_size = 128
+            
+    def get_embedding(self, image):
+        '''Takes an image with only the desired face'''
+        try :
+            preprocessed_face = functions.preprocess_face(image, target_size = self.target_size, detector_backend='mtcnn')
+            return model.predict(preprocessed_face)[0]
+        
+        except ValueError:
+            print('Please take another photo such that the desired person is more obvious')
 
-    def get_face_info(self, pixels):
-        """This function takes an image and extracts
-        laocation of faces in the image and normed embedding of them.
-        InsightFace performs both extraction and embedding.
-        """
-        return self.model.get(pixels)
-
-    def embed(self, image):
-        """Returns the embedding of face or faces in the image."""
-
-        pixels = self.prepare_image(image)
-        results = self.get_face_info(pixels)
-        # TODO: fixing problem of multiple faces in the same photo
-        return results[0].normed_embedding
-
-    def get_similarity(self, face1, face2):
-        face1_emb = self.embed(face1)
-        face2_emb = self.embed(face2)
-        cos_sim = dot(face1_emb, asarray(face2_emb).T)
-        return cos_sim
-
-    # TODO: make imagesEmbeds dynamic
-    def find(self, image, image_list):
-        most_similar = {"pk": -1, "value": -1}
-        for pk, source_image in image_list.items():
-            similarity = self.get_similarity(source_image, image)
-            if similarity > most_similar["value"]:
-                most_similar["index"] = pk
-                most_similar["value"] = similarity
-        return most_similar
