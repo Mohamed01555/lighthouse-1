@@ -2,6 +2,7 @@ from .. import models
 from django.http import JsonResponse
 from django.db import IntegrityError
 from .base import BaseViewSet
+from ..utils import get_user
 
 
 class MissingViewSet(BaseViewSet):
@@ -15,7 +16,10 @@ class MissingViewSet(BaseViewSet):
         name = data["name"]
         image = files["image"]
         try:
-            person = models.KnownMissingPerson(name=name, image=image)
+            user = get_user(self.request)
+            person = models.KnownMissingPerson(
+                contactPerson=user, name=name, image=image
+            )
             person.save()
             return JsonResponse(person.serialize(), status=201)
         except IntegrityError:

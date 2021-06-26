@@ -1,13 +1,19 @@
 from django.views.decorators.csrf import csrf_exempt
+
 from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.views import APIView
 
 from .viewsets.missing import *
 from .viewsets.search import *
-from rest_framework.views import APIView
 from .serializers import *
+from .utils import get_user
+from .models import KnownMissingPerson
+
 import jwt
 import datetime
-from rest_framework.exceptions import AuthenticationFailed
+
+from django.http import JsonResponse
 
 
 @csrf_exempt
@@ -26,6 +32,14 @@ def missing_id(request, pk):
 def find(request):
     view_set = FindMissingViewSet(request)
     return view_set.respond()
+
+
+@csrf_exempt
+def profile(request):
+    user = get_user(request)
+    reported_cases = KnownMissingPerson.objects.filter(contactPerson=user).all()
+    reported_cases = [case.serialize() for case in reported_cases]
+    return JsonResponse(reported_cases, safe=False)
 
 
 class Register(APIView):
@@ -66,17 +80,7 @@ class LoginView(APIView):
 
 class UserView(APIView):
     def get(self, request):
-        token = request.COOKIES.get("jwt")
-
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        try:
-            payload = jwt.decode(token, "secret", algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        user = User.objects.filter(id=payload["id"]).first()
+        user = get_user(request)
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
